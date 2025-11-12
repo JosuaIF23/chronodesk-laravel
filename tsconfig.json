@@ -6,7 +6,7 @@
         "baseUrl": "./",
         "paths": {
             "@/*": ["./resources/js/*"],
-            "@/components/*": ["resources/js/components/*"],
+            "@/components/*": ["resources/views/components/*"],
             "@/lib/*": ["./resources/js/lib/*"]
         },
         "lib": ["dom", "dom.iterable", "esnext"],
@@ -22,6 +22,6 @@
         "noEmit": true,
         "jsx": "preserve"
     },
-    "include": ["resources/js/**/*"],
+    "include": ["resources/js/**/*", "resources/views/components", "resources/views/layouts"],
     "exclude": ["node_modules", "vendor"]
 }

@@ -15,19 +15,19 @@ class TaskController extends Controller
 {
     /**
      * ================================
-     * 📋 INDEX - List Semua Task
+     * 📋 INDEX - List Semua Task + Statistik
      * ================================
      */
     public function index(Request $request)
     {
         $userId = Auth::id();
 
-        // 🔹 Ambil parameter filter dari request
+        // 🔹 Ambil filter dari request
         $q        = $request->string('q')->toString();
         $priority = $request->string('priority')->toString();
         $status   = $request->string('status')->toString(); // completed|active
 
-        // 🔹 Ambil semua task milik user dan load relasi subTasks
+        // 🔹 Query semua task user
         $tasksQuery = Task::where('user_id', $userId)
             ->with('subTasks')
             ->when($q, fn($query) => $query->where(function ($w) use ($q) {
@@ -39,10 +39,9 @@ class TaskController extends Controller
             ->when($status === 'active', fn($query) => $query->where('is_completed', false))
             ->latest();
 
-        // 🔹 Paginate hasilnya
         $tasks = $tasksQuery->paginate(20)->withQueryString();
 
-        // 🔹 Ubah relasi subTasks jadi array agar dikenali di React
+        // 🔹 Ubah relasi subTasks jadi array agar dikenali React
         $tasks = $tasks->through(function (Task $task) {
             return [
                 'id' => $task->id,
@@ -58,7 +57,9 @@ class TaskController extends Controller
             ];
         });
 
-        // 📊 Statistik waktu kerja (7 hari terakhir)
+        // ================================
+        // 📊 Statistik Waktu Kerja (7 Hari)
+        // ================================
         $from = Carbon::now()->subDays(6)->startOfDay();
         $to = Carbon::now()->endOfDay();
 
@@ -77,16 +78,28 @@ class TaskController extends Controller
             $timeSeries[] = (int) ($timeStats[$day]->minutes ?? 0);
         }
 
-        // 💰 Statistik keuangan
-        $income = FinanceLog::where('user_id', $userId)
+        // ================================
+        // 💰 Statistik Keuangan Harian (7 Hari)
+        // ================================
+        $financeLogs = FinanceLog::selectRaw('DATE(transaction_date) as date, type, SUM(amount) as total')
+            ->where('user_id', $userId)
             ->whereBetween('transaction_date', [$from, $to])
-            ->where('type', 'income')
-            ->sum('amount');
+            ->groupBy('date', 'type')
+            ->get();
 
-        $expense = FinanceLog::where('user_id', $userId)
-            ->whereBetween('transaction_date', [$from, $to])
-            ->where('type', 'expense')
-            ->sum('amount');
+        // Mapping income & expense harian
+        $incomeSeries = [];
+        $expenseSeries = [];
+
+        foreach ($dates as $day) {
+            $incomeSeries[] = (float) optional(
+                $financeLogs->firstWhere(fn($log) => $log->date === $day && $log->type === 'income')
+            )->total ?? 0;
+
+            $expenseSeries[] = (float) optional(
+                $financeLogs->firstWhere(fn($log) => $log->date === $day && $log->type === 'expense')
+            )->total ?? 0;
+        }
 
         return Inertia::render('app/TasksPage', [
             'tasks' => $tasks,
@@ -101,8 +114,9 @@ class TaskController extends Controller
                     'series' => $timeSeries,
                 ],
                 'finance' => [
-                    'income' => (float) $income,
-                    'expense' => (float) $expense,
+                    'categories' => $dates,
+                    'incomeSeries' => $incomeSeries,
+                    'expenseSeries' => $expenseSeries,
                 ],
             ],
             'flash' => [
@@ -112,11 +126,9 @@ class TaskController extends Controller
         ]);
     }
 
-    /**
-     * ================================
-     * ➕ STORE - Tambah Task Baru
-     * ================================
-     */
+    // ================================
+    // ➕ STORE
+    // ================================
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -135,11 +147,9 @@ class TaskController extends Controller
         return back()->with('success', 'Tugas berhasil ditambahkan!');
     }
 
-    /**
-     * ================================
-     * ✏️ UPDATE - Ubah Task
-     * ================================
-     */
+    // ================================
+    // ✏️ UPDATE
+    // ================================
     public function update(Request $request, Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
@@ -153,15 +163,12 @@ class TaskController extends Controller
         ]);
 
         $task->update($data);
-
         return back()->with('success', 'Tugas berhasil diperbarui!');
     }
 
-    /**
-     * ================================
-     * ❌ DESTROY - Hapus Task
-     * ================================
-     */
+    // ================================
+    // ❌ DESTROY
+    // ================================
     public function destroy(Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
@@ -174,11 +181,9 @@ class TaskController extends Controller
         return back()->with('success', 'Tugas berhasil dihapus!');
     }
 
-    /**
-     * ================================
-     * 🖼️ UPDATE COVER
-     * ================================
-     */
+    // ================================
+    // 🖼️ UPDATE COVER
+    // ================================
     public function updateCover(Request $request, Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
@@ -197,17 +202,14 @@ class TaskController extends Controller
         return back()->with('success', 'Cover berhasil diperbarui!');
     }
 
-    /**
-     * ================================
-     * 👁️ SHOW - Detail Task
-     * ================================
-     */
+    // ================================
+    // 👁️ SHOW
+    // ================================
     public function show(Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
 
         $task->load('subTasks');
-
         return Inertia::render('app/TaskDetail', [
             'task' => $task->toArray(),
         ]);

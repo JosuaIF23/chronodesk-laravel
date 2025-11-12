@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB; // ← Tambahkan ini
 
 return new class extends Migration {
     public function up(): void
@@ -12,8 +13,8 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->enum('type', ['income', 'expense']);
-            $table->decimal('amount', 12, 2);
-            $table->date('transaction_date')->default(now());
+            $table->decimal('amount', 15, 2)->default(0);
+            $table->date('transaction_date')->default(DB::raw('CURRENT_DATE')); // ✅ ini penting
             $table->timestamps();
         });
     }

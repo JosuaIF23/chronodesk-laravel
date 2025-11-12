@@ -4,20 +4,17 @@ import AppLayout from "@/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 import Chart from "react-apexcharts";
-
-// ⬇️ Import tabel dengan progress bar
 import TaskTable from "@/components/tasks/TaskTable";
 
 export default function TasksPage() {
     const { props } = usePage();
     const { tasks, filters, stats, flash } = props;
 
-    // 🔍 Filter & search state
     const [search, setSearch] = useState(filters?.q ?? "");
     const [priority, setPriority] = useState(filters?.priority ?? "");
     const [status, setStatus] = useState(filters?.status ?? "");
 
-    // ⏳ debounce filter pencarian
+    // 🔄 Refresh filter (debounce)
     useEffect(() => {
         const delay = setTimeout(() => {
             router.get(
@@ -29,7 +26,7 @@ export default function TasksPage() {
         return () => clearTimeout(delay);
     }, [search, priority, status]);
 
-    // 🔔 SweetAlert flash message
+    // 🔔 Flash message
     useEffect(() => {
         if (flash?.success) {
             Swal.fire({
@@ -66,21 +63,21 @@ export default function TasksPage() {
             confirmButtonText: "Tambah",
             showCancelButton: true,
             focusConfirm: false,
-            preConfirm: () => {
-                return {
-                    title: document.getElementById("sw-title").value,
-                    priority: document.getElementById("sw-priority").value,
-                    due_date: document.getElementById("sw-due").value,
-                    description: document.getElementById("sw-desc").value,
-                };
-            },
+            preConfirm: () => ({
+                title: document.getElementById("sw-title").value,
+                priority: document.getElementById("sw-priority").value,
+                due_date: document.getElementById("sw-due").value,
+                description: document.getElementById("sw-desc").value,
+            }),
         }).then((res) => {
             if (res.isConfirmed) {
                 const data = new FormData();
                 Object.entries(res.value).forEach(([k, v]) =>
                     data.append(k, v)
                 );
-                router.post("/todos", data);
+                router.post("/todos", data, {
+                    onSuccess: () => router.reload({ only: ["stats"] }),
+                });
             }
         });
     };
@@ -127,7 +124,9 @@ export default function TasksPage() {
                 Object.entries(res.value).forEach(([k, v]) =>
                     data.append(k, v)
                 );
-                router.post(`/todos/${task.id}`, data);
+                router.post(`/todos/${task.id}`, data, {
+                    onSuccess: () => router.reload({ only: ["stats"] }),
+                });
             }
         });
     };
@@ -150,39 +149,44 @@ export default function TasksPage() {
                 return true;
             },
         }).then((r) => {
-            if (r.isConfirmed) router.delete(`/todos/${task.id}`);
+            if (r.isConfirmed)
+                router.delete(`/todos/${task.id}`, {
+                    onSuccess: () => router.reload({ only: ["stats"] }),
+                });
         });
     };
 
     // 📖 Detail Task
-    const onDetail = (task) => {
-        router.visit(`/todos/${task.id}`);
-    };
+    const onDetail = (task) => router.visit(`/todos/${task.id}`);
 
-    // 📊 Chart configurations
+    // 📊 Chart configs
     const timeOptions = useMemo(
         () => ({
             chart: { type: "bar", toolbar: { show: false } },
             xaxis: { categories: stats.time.categories },
             plotOptions: { bar: { borderRadius: 4 } },
             dataLabels: { enabled: false },
+            colors: ["#2563eb"],
         }),
         [stats]
     );
 
     const financeOptions = useMemo(
         () => ({
-            chart: { type: "bar", toolbar: { show: false } },
-            xaxis: { categories: ["Income", "Expense"] },
-            dataLabels: { enabled: false },
+            chart: { type: "line", toolbar: { show: false } },
+            stroke: { curve: "smooth", width: 3 },
+            xaxis: { categories: stats.finance.categories },
+            dataLabels: { enabled: true },
+            legend: { position: "top" },
+            colors: ["#16a34a", "#dc2626"],
         }),
-        []
+        [stats]
     );
 
     return (
         <AppLayout>
             <div className="container mx-auto px-4 py-6 max-w-6xl">
-                {/* 🔙 Header */}
+                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <Button
@@ -202,7 +206,7 @@ export default function TasksPage() {
                     </Button>
                 </div>
 
-                {/* 🔍 Filter & Search */}
+                {/* Filter */}
                 <div className="grid md:grid-cols-5 gap-2 mb-5">
                     <input
                         className="border rounded px-3 py-2 md:col-span-2"
@@ -231,7 +235,7 @@ export default function TasksPage() {
                     </select>
                 </div>
 
-                {/* 📋 Tabel dengan Progress */}
+                {/* Table */}
                 <div className="overflow-x-auto border rounded-md mt-4">
                     <TaskTable
                         tasks={tasks}
@@ -241,7 +245,7 @@ export default function TasksPage() {
                     />
                 </div>
 
-                {/* 📄 Pagination */}
+                {/* Pagination */}
                 <div className="flex items-center justify-between mt-3">
                     <div className="text-sm text-muted-foreground">
                         Menampilkan {tasks.from ?? 0}–{tasks.to ?? 0} dari{" "}
@@ -284,20 +288,21 @@ export default function TasksPage() {
                     </div>
                     <div className="border rounded-lg p-4">
                         <h3 className="font-semibold mb-2">
-                            💰 Ringkasan Keuangan (7 Hari)
+                            💰 Keuangan Harian (7 Hari)
                         </h3>
                         <Chart
                             options={financeOptions}
                             series={[
                                 {
-                                    name: "Amount",
-                                    data: [
-                                        stats.finance.income,
-                                        stats.finance.expense,
-                                    ],
+                                    name: "Income",
+                                    data: stats.finance.incomeSeries,
+                                },
+                                {
+                                    name: "Expense",
+                                    data: stats.finance.expenseSeries,
                                 },
                             ]}
-                            type="bar"
+                            type="line"
                             height={280}
                         />
                     </div>

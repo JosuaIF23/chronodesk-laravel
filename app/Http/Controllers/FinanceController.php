@@ -35,7 +35,7 @@ class FinanceController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0|max:9999999999.99', // ✅ batas 10 miliar
             'type' => 'required|in:income,expense',
             'transaction_date' => 'required|date',
         ]);
@@ -51,7 +51,7 @@ class FinanceController extends Controller
         $log = FinanceLog::where('user_id', Auth::id())->findOrFail($id);
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0|max:9999999999.99', 
             'type' => 'required|in:income,expense',
             'transaction_date' => 'required|date',
         ]);

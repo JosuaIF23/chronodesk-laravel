@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\TimeTrackController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\CalendarController;
 
-// 🔹 Semua route Inertia
 Route::middleware(['handle.inertia'])->group(function () {
 
     /**
@@ -35,7 +35,7 @@ Route::middleware(['handle.inertia'])->group(function () {
      */
     Route::middleware(['check.auth'])->group(function () {
 
-        // 🔹 Dashboard / Beranda
+        // 🔹 Dashboard
         Route::get('/', [HomeController::class, 'home'])->name('home');
 
         /**
@@ -50,7 +50,13 @@ Route::middleware(['handle.inertia'])->group(function () {
             Route::delete('/{task}', [TaskController::class, 'destroy'])->name('todos.destroy');
             Route::get('/{task}', [TaskController::class, 'show'])->name('todos.show');
             Route::post('/{task}/cover', [TaskController::class, 'updateCover'])->name('todos.cover');
+
+            // ✅ SUBTASK ROUTES
+            Route::post('/{task}/subtasks', [SubTaskController::class, 'store'])->name('subtasks.store');
         });
+
+        Route::patch('/subtasks/{subTask}/toggle', [SubTaskController::class, 'toggle'])->name('subtasks.toggle');
+        Route::delete('/subtasks/{subTask}', [SubTaskController::class, 'destroy'])->name('subtasks.destroy');
 
         /**
          * =========================

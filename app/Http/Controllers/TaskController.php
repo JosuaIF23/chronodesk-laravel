@@ -14,17 +14,22 @@ use Carbon\Carbon;
 class TaskController extends Controller
 {
     /**
-     * List semua task user dengan filter, pencarian, dan pagination.
+     * ================================
+     * 📋 INDEX - List Semua Task
+     * ================================
      */
     public function index(Request $request)
     {
         $userId = Auth::id();
 
+        // 🔹 Ambil parameter filter dari request
         $q        = $request->string('q')->toString();
         $priority = $request->string('priority')->toString();
         $status   = $request->string('status')->toString(); // completed|active
 
-        $tasks = Task::where('user_id', $userId)
+        // 🔹 Ambil semua task milik user dan load relasi subTasks
+        $tasksQuery = Task::where('user_id', $userId)
+            ->with('subTasks')
             ->when($q, fn($query) => $query->where(function ($w) use ($q) {
                 $w->where('title', 'like', "%{$q}%")
                     ->orWhere('description', 'like', "%{$q}%");
@@ -32,11 +37,28 @@ class TaskController extends Controller
             ->when($priority, fn($query) => $query->where('priority', $priority))
             ->when($status === 'completed', fn($query) => $query->where('is_completed', true))
             ->when($status === 'active', fn($query) => $query->where('is_completed', false))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->latest();
 
-        // Statistik waktu kerja (7 hari terakhir)
+        // 🔹 Paginate hasilnya
+        $tasks = $tasksQuery->paginate(20)->withQueryString();
+
+        // 🔹 Ubah relasi subTasks jadi array agar dikenali di React
+        $tasks = $tasks->through(function (Task $task) {
+            return [
+                'id' => $task->id,
+                'title' => $task->title,
+                'priority' => $task->priority,
+                'due_date' => $task->due_date,
+                'is_completed' => $task->is_completed,
+                'sub_tasks' => $task->subTasks->map(fn($st) => [
+                    'id' => $st->id,
+                    'title' => $st->title,
+                    'is_completed' => $st->is_completed,
+                ]),
+            ];
+        });
+
+        // 📊 Statistik waktu kerja (7 hari terakhir)
         $from = Carbon::now()->subDays(6)->startOfDay();
         $to = Carbon::now()->endOfDay();
 
@@ -55,7 +77,7 @@ class TaskController extends Controller
             $timeSeries[] = (int) ($timeStats[$day]->minutes ?? 0);
         }
 
-        // Statistik keuangan
+        // 💰 Statistik keuangan
         $income = FinanceLog::where('user_id', $userId)
             ->whereBetween('transaction_date', [$from, $to])
             ->where('type', 'income')
@@ -91,7 +113,9 @@ class TaskController extends Controller
     }
 
     /**
-     * Simpan task baru.
+     * ================================
+     * ➕ STORE - Tambah Task Baru
+     * ================================
      */
     public function store(Request $request)
     {
@@ -112,7 +136,9 @@ class TaskController extends Controller
     }
 
     /**
-     * Update task.
+     * ================================
+     * ✏️ UPDATE - Ubah Task
+     * ================================
      */
     public function update(Request $request, Task $task)
     {
@@ -132,7 +158,9 @@ class TaskController extends Controller
     }
 
     /**
-     * Hapus task.
+     * ================================
+     * ❌ DESTROY - Hapus Task
+     * ================================
      */
     public function destroy(Task $task)
     {
@@ -147,14 +175,16 @@ class TaskController extends Controller
     }
 
     /**
-     * Ubah cover image task.
+     * ================================
+     * 🖼️ UPDATE COVER
+     * ================================
      */
     public function updateCover(Request $request, Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
 
         $request->validate([
-            'cover' => 'required|image|max:2048', // 2MB max
+            'cover' => 'required|image|max:2048',
         ]);
 
         if ($task->cover && Storage::disk('public')->exists($task->cover)) {
@@ -168,14 +198,18 @@ class TaskController extends Controller
     }
 
     /**
-     * Tampilkan detail task (untuk halaman TaskDetail.jsx)
+     * ================================
+     * 👁️ SHOW - Detail Task
+     * ================================
      */
     public function show(Task $task)
     {
         abort_unless($task->user_id === Auth::id(), 403);
 
+        $task->load('subTasks');
+
         return Inertia::render('app/TaskDetail', [
-            'task' => $task,
+            'task' => $task->toArray(),
         ]);
     }
 }

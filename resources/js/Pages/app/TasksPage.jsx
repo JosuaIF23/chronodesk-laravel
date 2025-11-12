@@ -5,16 +5,19 @@ import { Button } from "@/Components/ui/button";
 import Swal from "sweetalert2";
 import Chart from "react-apexcharts";
 
+// ⬇️ Import tabel dengan progress bar
+import TaskTable from "@/Components/tasks/TaskTable";
+
 export default function TasksPage() {
     const { props } = usePage();
-    const { tasks, filters, stats, flash, auth } = props;
+    const { tasks, filters, stats, flash } = props;
 
     // 🔍 Filter & search state
     const [search, setSearch] = useState(filters?.q ?? "");
     const [priority, setPriority] = useState(filters?.priority ?? "");
     const [status, setStatus] = useState(filters?.status ?? "");
 
-    // ⏳ debounce timer
+    // ⏳ debounce filter pencarian
     useEffect(() => {
         const delay = setTimeout(() => {
             router.get(
@@ -26,7 +29,7 @@ export default function TasksPage() {
         return () => clearTimeout(delay);
     }, [search, priority, status]);
 
-    // 🔔 SweetAlert flash
+    // 🔔 SweetAlert flash message
     useEffect(() => {
         if (flash?.success) {
             Swal.fire({
@@ -46,7 +49,7 @@ export default function TasksPage() {
         }
     }, [flash]);
 
-    // ➕ Tambah Task (popup)
+    // ➕ Tambah Task
     const onAdd = () => {
         Swal.fire({
             title: "Tambah Task Baru",
@@ -82,7 +85,7 @@ export default function TasksPage() {
         });
     };
 
-    // ✏️ Ubah data
+    // ✏️ Edit Task
     const onEdit = (task) => {
         Swal.fire({
             title: "Ubah Task",
@@ -129,7 +132,7 @@ export default function TasksPage() {
         });
     };
 
-    // ❌ Hapus dengan ketik ulang
+    // ❌ Hapus Task
     const onDelete = (task) => {
         Swal.fire({
             title: "Konfirmasi Hapus",
@@ -151,12 +154,12 @@ export default function TasksPage() {
         });
     };
 
-    // 📖 Detail task
+    // 📖 Detail Task
     const onDetail = (task) => {
         router.visit(`/todos/${task.id}`);
     };
 
-    // 📊 Chart config
+    // 📊 Chart configurations
     const timeOptions = useMemo(
         () => ({
             chart: { type: "bar", toolbar: { show: false } },
@@ -178,8 +181,8 @@ export default function TasksPage() {
 
     return (
         <AppLayout>
-            <div className="container mx-auto px-4 py-6">
-                {/* 🔙 Tombol kembali & header */}
+            <div className="container mx-auto px-4 py-6 max-w-6xl">
+                {/* 🔙 Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <Button
@@ -199,7 +202,7 @@ export default function TasksPage() {
                     </Button>
                 </div>
 
-                {/* 🔍 Live Search & Filter */}
+                {/* 🔍 Filter & Search */}
                 <div className="grid md:grid-cols-5 gap-2 mb-5">
                     <input
                         className="border rounded px-3 py-2 md:col-span-2"
@@ -228,74 +231,14 @@ export default function TasksPage() {
                     </select>
                 </div>
 
-                {/* 📋 Tabel */}
-                <div className="overflow-x-auto border rounded-md">
-                    <table className="min-w-full text-sm">
-                        <thead className="bg-muted/50">
-                            <tr>
-                                <th className="p-2 text-left">Title</th>
-                                <th className="p-2 text-left">Priority</th>
-                                <th className="p-2 text-left">Due</th>
-                                <th className="p-2 text-left">Status</th>
-                                <th className="p-2 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.data.length > 0 ? (
-                                tasks.data.map((t) => (
-                                    <tr
-                                        key={t.id}
-                                        className="border-t hover:bg-muted/40 transition"
-                                    >
-                                        <td className="p-2">{t.title}</td>
-                                        <td className="p-2 capitalize">
-                                            {t.priority}
-                                        </td>
-                                        <td className="p-2">
-                                            {t.due_date ?? "-"}
-                                        </td>
-                                        <td className="p-2">
-                                            {t.is_completed
-                                                ? "Selesai"
-                                                : "Aktif"}
-                                        </td>
-                                        <td className="p-2 text-right space-x-2">
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                onClick={() => onDetail(t)}
-                                            >
-                                                Detail
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => onEdit(t)}
-                                            >
-                                                Ubah
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => onDelete(t)}
-                                            >
-                                                Hapus
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan="5"
-                                        className="p-4 text-center text-muted-foreground"
-                                    >
-                                        Tidak ada data
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {/* 📋 Tabel dengan Progress */}
+                <div className="overflow-x-auto border rounded-md mt-4">
+                    <TaskTable
+                        tasks={tasks}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onDetail={onDetail}
+                    />
                 </div>
 
                 {/* 📄 Pagination */}

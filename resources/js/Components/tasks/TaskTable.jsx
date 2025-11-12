@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function TaskTable({ tasks, onEdit, onDelete, onDetail }) {
     // Debug data (opsional)

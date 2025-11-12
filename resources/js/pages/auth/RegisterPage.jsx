@@ -1,21 +1,20 @@
-
 import React from "react";
-import AuthLayout from "@/Layouts/AuthLayout";
+import AuthLayout from "@/layouts/AuthLayout";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/Components/ui/card";
+} from "@/components/ui/card";
 import {
     Field,
     FieldLabel,
     FieldDescription,
     FieldGroup,
-} from "@/Components/ui/field";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Link, useForm } from "@inertiajs/react";
 
 export default function RegisterPage() {

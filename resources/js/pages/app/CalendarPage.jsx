@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import AppLayout from "@/Layouts/AppLayout";
+import AppLayout from "@/layouts/AppLayout";
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import { router } from "@inertiajs/react";
 
 export default function CalendarPage() {

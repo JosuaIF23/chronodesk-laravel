@@ -1,24 +1,23 @@
-
 import React from "react";
 import { useForm, usePage } from "@inertiajs/react";
-import AuthLayout from "@/Layouts/AuthLayout";
+import AuthLayout from "@/layouts/AuthLayout";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/Components/ui/card";
+} from "@/components/ui/card";
 import {
     Field,
     FieldLabel,
     FieldDescription,
     FieldGroup,
-} from "@/Components/ui/field";
-import { Alert, AlertTitle, AlertDescription } from "@/Components/ui/alert";
+} from "@/components/ui/field";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2Icon } from "lucide-react";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
     // Ambil data dari controller Laravel

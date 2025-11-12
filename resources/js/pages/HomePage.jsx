@@ -1,6 +1,6 @@
 import React from "react";
-import AppLayout from "@/Layouts/AppLayout";
-import { Button } from "@/Components/ui/button";
+import AppLayout from "@/layouts/AppLayout";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -8,7 +8,7 @@ import {
     CardHeader,
     CardTitle,
     CardFooter,
-} from "@/Components/ui/card";
+} from "@/components/ui/card";
 
 export default function HomePage() {
     const technologies = [

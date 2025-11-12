@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import AppLayout from "@/Layouts/AppLayout";
+import AppLayout from "@/layouts/AppLayout";
 import { usePage, router } from "@inertiajs/react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 
 export default function TimerPage() {

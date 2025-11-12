@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { usePage, router } from "@inertiajs/react";
-import AppLayout from "@/Layouts/AppLayout";
-import { Button } from "@/Components/ui/button";
+import AppLayout from "@/layouts/AppLayout";
+import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 import Chart from "react-apexcharts";
 
 // ⬇️ Import tabel dengan progress bar
-import TaskTable from "@/Components/tasks/TaskTable";
+import TaskTable from "@/components/tasks/TaskTable";
 
 export default function TasksPage() {
     const { props } = usePage();

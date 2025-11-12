@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, router, usePage } from "@inertiajs/react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function AppLayout({ children }) {
     const { props } = usePage();

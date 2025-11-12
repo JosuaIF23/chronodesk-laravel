@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { usePage, router } from "@inertiajs/react";
-import AppLayout from "@/Layouts/AppLayout";
-import { Button } from "@/Components/ui/button";
+import AppLayout from "@/layouts/AppLayout";
+import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 
 export default function TaskDetail() {

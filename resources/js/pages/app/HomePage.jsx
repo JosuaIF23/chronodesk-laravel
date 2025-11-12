@@ -1,9 +1,8 @@
 import React from "react";
 import { usePage, router } from "@inertiajs/react";
-import AppLayout from "@/Layouts/AppLayout";
-import { Button } from "@/Components/ui/button";
+import AppLayout from "@/layouts/AppLayout";
+import { Button } from "@/components/ui/button";
 // import TaskTable from "@/Components/app/TaskTable";
-
 
 export default function HomePage() {
     const { auth } = usePage().props;
@@ -15,10 +14,14 @@ export default function HomePage() {
                     {/* 🔹 Header / Hero Section */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold mb-4">
-                            👋 {auth ? `Hai, ${auth.name}!` : "Selamat Datang di ChronoDesk"}
+                            👋{" "}
+                            {auth
+                                ? `Hai, ${auth.name}!`
+                                : "Selamat Datang di ChronoDesk"}
                         </h1>
                         <p className="text-lg text-muted-foreground">
-                            Kelola waktu, tugas, dan keuanganmu dengan lebih mudah 🚀
+                            Kelola waktu, tugas, dan keuanganmu dengan lebih
+                            mudah 🚀
                         </p>
                         <Button
                             className="bg-blue-600 hover:bg-blue-700 text-white mt-5"
@@ -67,7 +70,8 @@ export default function HomePage() {
                         {/* Catatan Keuangan */}
                         <div className="p-5 border rounded-xl bg-card shadow-sm hover:shadow-md transition">
                             <h2 className="text-lg font-semibold mb-2 flex items-center">
-                                💰 <span className="ml-2">Catatan Keuangan</span>
+                                💰{" "}
+                                <span className="ml-2">Catatan Keuangan</span>
                             </h2>
                             <p className="text-sm text-muted-foreground mb-3">
                                 Pantau pemasukan dan pengeluaran proyekmu.
@@ -88,7 +92,8 @@ export default function HomePage() {
                             🌟 Tetap Produktif Hari Ini!
                         </h3>
                         <p className="text-muted-foreground">
-                            “Produktivitas bukan tentang bekerja keras, tapi bekerja cerdas dan konsisten.”
+                            “Produktivitas bukan tentang bekerja keras, tapi
+                            bekerja cerdas dan konsisten.”
                         </p>
                     </div>
                 </div>

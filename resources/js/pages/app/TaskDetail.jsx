@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import AppLayout from "@/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,30 @@ export default function TaskDetail() {
     const { task } = props;
 
     const [newSubTask, setNewSubTask] = useState("");
+    const fileInput = useRef(null);
 
+    // ✅ Upload cover handler
+    const onUploadCover = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("cover", file);
+        formData.append("_method", "patch");
+
+        router.post(`/todos/${task.id}/cover`, formData, {
+            preserveScroll: true,
+            onSuccess: () =>
+                Swal.fire({
+                    icon: "success",
+                    title: "Cover berhasil diperbarui!",
+                    timer: 1500,
+                    showConfirmButton: false,
+                }),
+        });
+    };
+
+    // ✅ Tambah Subtask
     const addSubTask = (e) => {
         e.preventDefault();
         if (!newSubTask.trim()) return;
@@ -52,13 +75,35 @@ export default function TaskDetail() {
                         {task.description}
                     </p>
 
-                    {task.cover && (
-                        <img
-                            src={`/storage/${task.cover}`}
-                            alt="cover"
-                            className="w-full h-48 object-cover rounded mb-4"
+                    {/* ✅ Cover dan tombol ubah */}
+                    <div className="mb-4">
+                        {task.cover ? (
+                            <img
+                                src={`/storage/${task.cover}`}
+                                alt="cover"
+                                className="w-full h-48 object-cover rounded mb-2"
+                            />
+                        ) : (
+                            <div className="border rounded p-6 text-center text-gray-400 mb-2">
+                                Belum ada cover
+                            </div>
+                        )}
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fileInput.current?.click()}
+                        >
+                            📷 Ubah Cover
+                        </Button>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInput}
+                            className="hidden"
+                            onChange={onUploadCover}
                         />
-                    )}
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm mb-6">
                         <div>

@@ -49,7 +49,8 @@ Route::middleware(['handle.inertia'])->group(function () {
             Route::patch('/{task}', [TaskController::class, 'update'])->name('todos.update');
             Route::delete('/{task}', [TaskController::class, 'destroy'])->name('todos.destroy');
             Route::get('/{task}', [TaskController::class, 'show'])->name('todos.show');
-            Route::post('/{task}/cover', [TaskController::class, 'updateCover'])->name('todos.cover');
+            Route::patch('/{task}/cover', [TaskController::class, 'updateCover'])->name('todos.cover');
+
 
             // ✅ SUBTASK ROUTES
             Route::post('/{task}/subtasks', [SubTaskController::class, 'store'])->name('subtasks.store');

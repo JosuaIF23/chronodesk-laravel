@@ -1,52 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, router, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
-import Swal from "sweetalert2";
 
 export default function AppLayout({ children }) {
     const { props } = usePage();
     const { auth } = props;
-
-    // 🔔 Reminder popup (In-App)
-    useEffect(() => {
-        const checkReminders = async () => {
-            try {
-                const res = await fetch("/api/reminders");
-                const data = await res.json();
-
-                if (data.length > 0) {
-                    Swal.fire({
-                        icon: "info",
-                        title: "🔔 Pengingat Tugas!",
-                        html: data
-                            .map(
-                                (t) =>
-                                    `<p><b>${t.title}</b><br/>Jatuh tempo ${t.remaining_time} (${t.due_date})</p>`
-                            )
-                            .join(""),
-                        showCancelButton: true,
-                        confirmButtonText: "📋 Lihat Todo",
-                        cancelButtonText: "Tutup",
-                        confirmButtonColor: "#2563eb",
-                        allowOutsideClick: false,
-                    }).then((r) => {
-                        if (r.isConfirmed) {
-                            router.visit("/todos");
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error("Gagal memuat reminder:", e);
-            }
-        };
-
-        // Jalankan sekali saat halaman dibuka
-        checkReminders();
-
-        // Cek ulang setiap 5 menit
-        const interval = setInterval(checkReminders, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, []);
 
     // 🔹 Fungsi Logout
     const onLogout = () => router.get("/auth/logout");

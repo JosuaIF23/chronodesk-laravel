@@ -29,6 +29,6 @@ class CalendarController extends Controller
             ->selectRaw("id, title, transaction_date as start, type")
             ->get();
 
-        return response()->json($tasks->merge($finances));
+        return response()->json($tasks->concat($finances));
     }
 }

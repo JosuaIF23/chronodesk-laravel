@@ -189,7 +189,7 @@ class TaskController extends Controller
         abort_unless($task->user_id === Auth::id(), 403);
 
         $request->validate([
-            'cover' => 'required|image|max:2048',
+            'cover' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($task->cover && Storage::disk('public')->exists($task->cover)) {

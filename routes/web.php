@@ -20,7 +20,7 @@ Route::middleware(['handle.inertia'])->group(function () {
      */
     Route::prefix('auth')->group(function () {
         Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
-        Route::post('/login/post', [AuthController::class, 'postLogin'])->name('auth.login.post');
+        Route::post('/login/post', [AuthController::class, 'postLogin'])->name('auth.login.post')->middleware('throttle:5,1');
 
         Route::get('/register', [AuthController::class, 'register'])->name('auth.register');
         Route::post('/register/post', [AuthController::class, 'postRegister'])->name('auth.register.post');

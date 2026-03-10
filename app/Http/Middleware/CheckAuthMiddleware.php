@@ -17,7 +17,7 @@ class CheckAuthMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check()) {
-            return redirect()->route('auth.logout');
+            return redirect()->route('auth.login');
         }
 
         return $next($request);
